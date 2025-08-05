@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Car Price Predictor</title>
+</head>
+<body>
+    <h2>Predict Car Price</h2>
+
+    <form method="POST">
+
+        Make:
+        <select name="make" id="make" required>
+            <option value="">-- Select Make --</option>
+            {% for make in makes %}
+                <option value="{{ make }}">{{ make }}</option>
+            {% endfor %}
+        </select><br>
+
+        Model:
+        <select name="model" id="model" required>
+            <option value="">-- Select Model --</option>
+        </select><br>
+
+        Trim:
+        <select name="trim" id="trim" required>
+            <option value="">-- Select Trim --</option>
+        </select><br>
+
+        Interior:
+        <select name="interior" id="interior" required>
+            <option value="">-- Select Interior --</option>
+        </select><br>
+
+        Year:
+        <select name="year" id="year" required>
+            <option value="">-- Select Year --</option>
+        </select><br>
+
+        Condition:
+        <select name="condition" required>
+            <option value="">-- Select Condition (1–5) --</option>
+            {% for i in range(1, 6) %}
+                <option value="{{ i }}">{{ i }}</option>
+            {% endfor %}
+        </select><br>
+
+        Odometer: <input type="number" name="odometer" required><br>
+
+        Sale Year:
+        <select name="sale_year" id="sale_year" required>
+            <option value="">-- Select Sale Year --</option>
+        </select><br>
+
+        <input type="submit" value="Predict">
+    </form>
+
+    {% if prediction %}
+        <div style="margin-top: 20px; padding: 10px; background-color: #f0f0f0; border-radius: 8px; width: fit-content;">
+            <h3>Estimated Selling Price:</h3>
+            <p style="font-size: 20px; font-weight: bold;">${{ prediction }}</p>
+        </div>
+    {% endif %}
+
+    <script>
+        document.getElementById("make").addEventListener("change", function() {
+            let make = this.value;
+
+            fetch("/get-models/" + encodeURIComponent(make))
+                .then(res => res.json())
+                .then(data => {
+                    let modelSelect = document.getElementById("model");
+                    modelSelect.innerHTML = '<option value="">-- Select Model --</option>';
+                    data.forEach(model => modelSelect.innerHTML += `<option value="${model}">${model}</option>`);
+
+                    document.getElementById("trim").innerHTML = '<option value="">-- Select Trim --</option>';
+                    document.getElementById("interior").innerHTML = '<option value="">-- Select Interior --</option>';
+                    document.getElementById("year").innerHTML = '<option value="">-- Select Year --</option>';
+                });
+        });
+
+        document.getElementById("model").addEventListener("change", function() {
+            let make = document.getElementById("make").value;
+            let model = this.value;
+
+            fetch(`/get-trims/${encodeURIComponent(make)}/${encodeURIComponent(model)}`)
+                .then(res => res.json())
+                .then(data => {
+                    let trimSelect = document.getElementById("trim");
+                    trimSelect.innerHTML = '<option value="">-- Select Trim --</option>';
+                    data.forEach(trim => trimSelect.innerHTML += `<option value="${trim}">${trim}</option>`);
+                    document.getElementById("interior").innerHTML = '<option value="">-- Select Interior --</option>';
+                });
+
+            fetch(`/get-years/${encodeURIComponent(make)}/${encodeURIComponent(model)}`)
+                .then(res => res.json())
+                .then(data => {
+                    let yearSelect = document.getElementById("year");
+                    yearSelect.innerHTML = '<option value="">-- Select Year --</option>';
+                    data.forEach(year => yearSelect.innerHTML += `<option value="${year}">${year}</option>`);
+                });
+
+            fetch(`/get-sale-years/${encodeURIComponent(make)}/${encodeURIComponent(model)}`)
+                .then(res => res.json())
+                .then(data => {
+                    let saleYearSelect = document.getElementById("sale_year");
+                    saleYearSelect.innerHTML = '<option value="">-- Select Sale Year --</option>';
+                    data.forEach(year => saleYearSelect.innerHTML += `<option value="${year}">${year}</option>`);
+                });
+        });
+
+        document.getElementById("trim").addEventListener("change", function() {
+            let make = document.getElementById("make").value;
+            let model = document.getElementById("model").value;
+            let trim = this.value;
+
+            fetch(`/get-interiors/${encodeURIComponent(make)}/${encodeURIComponent(model)}/${encodeURIComponent(trim)}`)
+                .then(res => res.json())
+                .then(data => {
+                    let interiorSelect = document.getElementById("interior");
+                    interiorSelect.innerHTML = '<option value="">-- Select Interior --</option>';
+                    data.forEach(int => interiorSelect.innerHTML += `<option value="${int}">${int}</option>`);
+                });
+        });
+    </script>
+</body>
+</html>
