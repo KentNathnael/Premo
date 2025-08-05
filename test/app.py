@@ -23,6 +23,7 @@ def connect_db():
     return mysql.connector.connect(
         host='localhost',
         user='root',
+        port=3308,
         password='',
         database='car_prices'
     )
@@ -59,10 +60,6 @@ def index():
         try:
             year = int(request.form["year"])
             make = request.form["make"]
-
-            print(">>> MAKE from form:", make)
-            print(">>> Known make labels in encoder:", encoders['make'].classes_)
-            print(">>> TYPE of make transform:", type(encoders['make'].transform([make])))       
             model_name = request.form["model"]
             trim = request.form["trim"]
             interior = request.form["interior"]
@@ -70,14 +67,7 @@ def index():
             odometer = int(request.form["odometer"])
             sale_year = int(request.form["sale_year"])
 
-            # Debug prints
-            print("Received form data:")
-            print("Make:", make)
-            print("Model:", model_name)
-            print("Trim:", trim)
-            print("Interior:", interior)
-
-            # Validation: check if inputs exist in encoder
+            # Validasi input
             if make not in encoders['make'].classes_:
                 raise ValueError(f"Make '{make}' not found in encoder.")
             if model_name not in encoders['model'].classes_:
@@ -86,29 +76,6 @@ def index():
                 raise ValueError(f"Trim '{trim}' not found in encoder.")
             if interior not in encoders['interior'].classes_:
                 raise ValueError(f"Interior '{interior}' not found in encoder.")
-
-            make_encoded = encoders['make'].transform([make])[0]
-            model_encoded = encoders['model'].transform([model_name])[0]
-            trim_encoded = encoders['trim'].transform([trim])[0]
-            interior_encoded = encoders['interior'].transform([interior])[0]
-
-            input_data = np.array([[year, make_encoded, model_encoded, trim_encoded,
-                                    interior_encoded, condition, odometer, sale_year]])
-
-            pred_price = model.predict(input_data)[0]
-            prediction = round(pred_price, 2)
-
-        except Exception as e:
-            prediction = f"Prediction Error: {e}"
-        try:
-            year = int(request.form["year"])
-            make = request.form["make"]
-            model_name = request.form["model"]
-            trim = request.form["trim"]
-            interior = request.form["interior"]
-            condition = float(request.form["condition"])
-            odometer = int(request.form["odometer"])
-            sale_year = int(request.form["sale_year"])
 
             # Encode
             make_encoded = encoders['make'].transform([make])[0]
@@ -123,7 +90,7 @@ def index():
             prediction = round(pred_price, 2)
 
         except Exception as e:
-            prediction = f"Error: {e}"
+            prediction = f"Prediction Error: {e}"
 
     return render_template("index.html",
                            makes=makes,
