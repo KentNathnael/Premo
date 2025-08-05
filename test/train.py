@@ -4,6 +4,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from xgboost import XGBRegressor
 import pickle
+import json
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 # 🔌 Koneksi ke database
 def load_data_from_mysql():
@@ -12,7 +14,7 @@ def load_data_from_mysql():
         user='root',
         password='',
         database='car_prices',
-        port=3308  # GANTI JADI 3308
+        port=3308
     )
     query = "SELECT * FROM car"
     df = pd.read_sql(query, conn)
@@ -65,5 +67,8 @@ with open('../model/best_xgboost_model.pkl', 'wb') as f:
 
 with open('../model/label_encoders.pkl', 'wb') as f:
     pickle.dump(encoders, f)
+
+
+
 
 print("✅ Model dan encoder berhasil disimpan.")

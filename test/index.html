@@ -44,7 +44,7 @@
             {% endfor %}
         </select><br>
 
-        Odometer: <input type="number" name="odometer" required><br>
+        Odometer (Miles): <input type="number" name="odometer" required><br>
 
         Sale Year:
         <select name="sale_year" id="sale_year" required>
@@ -60,6 +60,14 @@
             <p style="font-size: 20px; font-weight: bold;">${{ prediction }}</p>
         </div>
     {% endif %}
+
+    {% if car_description %}
+    <div style="margin-top: 10px; padding: 10px; background-color: #f0f0f0; border-radius: 8px; width: fit-content;">
+        <h3>Deskripsi Mobil:</h3>
+        <p>{{ car_description }}</p>
+    </div>
+    {% endif %}
+
 
     <script>
         document.getElementById("make").addEventListener("change", function() {
