@@ -7,9 +7,9 @@ import joblib
 from openai import OpenAI
 from dotenv import load_dotenv
 
-# load_dotenv()
-# api_key = os.getenv("OPENAI_API_KEY")
-# client = OpenAI(api_key=api_key)
+load_dotenv()
+api_key = os.getenv("OPENAI_API_KEY")
+client = OpenAI(api_key=api_key)
 
 app = Flask(__name__, template_folder='.')
 
@@ -29,7 +29,7 @@ def connect_db():
     return mysql.connector.connect(
         host='localhost',
         user='root',
-        port=3306,
+        port=3308,
         password='',
         database='car_prices'
     )
@@ -55,7 +55,7 @@ def get_distinct_sale_years():
 @app.route('/', methods=["GET", "POST"])
 def index():
     prediction = None
-    # car_description = None
+    car_description = None
     makes = get_distinct_values("make")
     models = get_distinct_values("model")
     trims = get_distinct_values("trim")
@@ -95,18 +95,18 @@ def index():
             pred_price = model.predict(input_data)[0]
             prediction = round(pred_price, 2)
             
-            # prompt = f"Berikan saya deskripsi singkat dalam bahasa inggris mengenai mobil {make} {model_name} tahun {year}. Mohon untuk tidak menyertakan harga dalam deskripsi ini dan gunakan bahasa yang biasa digunakan dalam situs jual beli mobil bekas."
+            prompt = f"Berikan saya deskripsi singkat dalam bahasa inggris mengenai mobil {make} {model_name} tahun {year}. Mohon untuk tidak menyertakan harga dalam deskripsi ini dan gunakan bahasa yang biasa digunakan dalam situs jual beli mobil bekas."
 
-            # try:
-            #     response = client.chat.completions.create(
-            #         model="gpt-3.5-turbo",
-            #         messages=[
-            #             {"role": "user", "content": prompt},
-            #         ]
-            #     )
-            #     car_description = response.choices[0].message.content
-            # except Exception as e:
-            #     car_description = f"Gagal ambil deskripsi dari GPT: {e}"
+            try:
+                response = client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "user", "content": prompt},
+                    ]
+                )
+                car_description = response.choices[0].message.content
+            except Exception as e:
+                car_description = f"Gagal ambil deskripsi dari GPT: {e}"
 
         except Exception as e:
             prediction = f"Prediction Error: {e}"
@@ -117,8 +117,8 @@ def index():
                            trims=trims,
                            interiors=interiors,
                            sale_years=sale_years,
-                           prediction=prediction)
-                        #    car_description=car_description)
+                           prediction=prediction,
+                           car_description=car_description)
 
 # CHAINED ENDPOINTS
 @app.route('/get-models/<make>')

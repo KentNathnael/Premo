@@ -1,137 +1,279 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Car Price Predictor</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Car Price Predictor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg1:#0f172a; --bg2:#1b1b2a; --bg3:#0a0a0f;
+      --card:#141423cc; --card-strong:#1e1e2e;
+      --text:#e2e8f0; --muted:#94a3b8;
+      --line:#334155;
+      --grad1:#6366f1; --grad2:#8b5cf6; --grad3:#ec4899; --grad4:#22d3ee;
+      --ring:#8b5cf6;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      font-family:'Poppins',sans-serif;
+      background: radial-gradient(1200px 800px at 10% 0%, var(--bg1) 0%, var(--bg2) 35%, var(--bg3) 100%);
+      color:var(--text); margin:0; padding:24px;
+      display:flex; justify-content:center; align-items:flex-start;
+    }
+
+    .container{ width:100%; max-width:1100px; }
+    .title{
+      text-align:center; margin:6px 0 22px;
+      font-size:34px; font-weight:700;
+      background:linear-gradient(90deg,var(--grad1),var(--grad2),var(--grad3),var(--grad4));
+      -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+      letter-spacing:0.3px;
+    }
+
+    /* layout */
+    .layout{
+      display:grid; gap:22px;
+      grid-template-columns: 1fr 340px;
+    }
+    @media (max-width: 900px){
+      .layout{ grid-template-columns: 1fr; }
+    }
+
+    /* card */
+    .card{
+      position:relative;
+      background: var(--card);
+      backdrop-filter: blur(12px);
+      border:1px solid #2b2f43;
+      border-radius:18px;
+      box-shadow: 0 10px 40px rgba(23,17,54,.35);
+      overflow:hidden;
+    }
+    .card::before{
+      content:""; position:absolute; inset:-2px; border-radius:20px;
+      background: linear-gradient(270deg,var(--grad1),var(--grad2),var(--grad3),var(--grad4));
+      background-size:300% 300%; filter: blur(14px); z-index:-1;
+      animation: glow 12s linear infinite;
+      opacity:.25;
+    }
+    @keyframes glow{0%{background-position:0 50%}100%{background-position:300% 50%}}
+
+    /* form */
+    form{ padding:26px 28px; display:grid; gap:16px }
+    .field{ display:flex; flex-direction:column; gap:8px }
+    .label{ font-size:13px; color:var(--muted) }
+
+    select,input[type="number"]{
+      width:100%; padding:12px 14px; font-size:15px; color:var(--text);
+      background:#0f172a; border:1px solid var(--line); border-radius:12px;
+      transition: box-shadow .15s ease, border-color .15s ease, transform .02s ease;
+      outline: none;
+      box-shadow: inset 0 0 0 rgba(0,0,0,0);
+    }
+    select:hover,input[type="number"]:hover{border-color:#475569}
+    select:focus,input[type="number"]:focus{
+      border-color:var(--grad3);
+      box-shadow: 0 0 0 3px rgba(236,72,153,.25);
+    }
+
+    .submit{
+      margin-top:6px; padding:13px 16px; border:0; border-radius:12px;
+      font-weight:600; font-size:16px; cursor:pointer; color:white;
+      background: linear-gradient(270deg,var(--grad1),var(--grad2),var(--grad3),var(--grad4));
+      background-size:300% 300%;
+      transition: transform .15s ease, box-shadow .2s ease;
+      animation: glow 9s linear infinite;
+    }
+    .submit:hover{ transform: translateY(-1.5px); box-shadow:0 10px 24px rgba(139,92,246,.45) }
+
+    /* side panel */
+    .panel{ padding:18px 18px 22px }
+    .panel .head{
+      font-size:16px; font-weight:600; color:#c7d2fe; letter-spacing:.2px;
+      margin-bottom:10px;
+    }
+    .result-box{
+      background: rgba(30,30,48,.9);
+      border:1px solid var(--ring);
+      border-radius:14px;
+      padding:18px 16px; text-align:center;
+      box-shadow: 0 0 24px rgba(139,92,246,.45);
+    }
+    .result-box .amount{
+      font-size:32px; font-weight:700; margin-top:4px;
+      text-shadow: 0 0 18px rgba(236,72,153,.35);
+    }
+    .empty{
+      border:1px dashed #475569; border-radius:14px; padding:16px; color:#94a3b8;
+      text-align:center;
+    }
+
+    /* little helper rows */
+    .grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:14px }
+    @media (max-width:700px){ .grid-2{ grid-template-columns:1fr } }
+  </style>
 </head>
 <body>
-    <h2>Predict Car Price</h2>
+  <div class="container">
+    <h1 class="title">Predict Car Price</h1>
 
-    <form method="POST">
-        
-        Make:
-        <select name="make" id="make" required>
-            <option value="">-- Select Make --</option>
-            {% for make in makes %}
+    <div class="layout">
+      <!-- LEFT: FORM -->
+      <div class="card">
+        <form method="POST">
+          <div class="field">
+            <span class="label">Make</span>
+            <select name="make" id="make" required>
+              <option value="">-- Select Make --</option>
+              {% for make in makes %}
                 <option value="{{ make }}">{{ make }}</option>
-            {% endfor %}
-        </select><br>
+              {% endfor %}
+            </select>
+          </div>
 
-        Model:
-        <select name="model" id="model" required>
-            <option value="">-- Select Model --</option>
-        </select><br>
+          <div class="field">
+            <span class="label">Model</span>
+            <select name="model" id="model" required>
+              <option value="">-- Select Model --</option>
+            </select>
+          </div>
 
-        Trim:
-        <select name="trim" id="trim" required>
-            <option value="">-- Select Trim --</option>
-        </select><br>
+          <div class="grid-2">
+            <div class="field">
+              <span class="label">Trim</span>
+              <select name="trim" id="trim" required>
+                <option value="">-- Select Trim --</option>
+              </select>
+            </div>
+            <div class="field">
+              <span class="label">Interior</span>
+              <select name="interior" id="interior" required>
+                <option value="">-- Select Interior --</option>
+              </select>
+            </div>
+          </div>
 
-        Interior:
-        <select name="interior" id="interior" required>
-            <option value="">-- Select Interior --</option>
-        </select><br>
+          <div class="grid-2">
+            <div class="field">
+              <span class="label">Year</span>
+              <select name="year" id="year" required>
+                <option value="">-- Select Year --</option>
+              </select>
+            </div>
+            <div class="field">
+              <span class="label">Condition</span>
+              <select name="condition" required>
+                <option value="">-- Select Condition (1–5) --</option>
+                {% for i in range(1,6) %}
+                  <option value="{{ i }}">{{ i }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
 
-        Year:
-        <select name="year" id="year" required>
-            <option value="">-- Select Year --</option>
-        </select><br>
+          <div class="grid-2">
+            <div class="field">
+              <span class="label">Odometer (Miles)</span>
+              <input type="number" name="odometer" min="0" step="1" required/>
+            </div>
+            <div class="field">
+              <span class="label">Sale Year</span>
+              <select name="sale_year" id="sale_year" required>
+                <option value="">-- Select Sale Year --</option>
+              </select>
+            </div>
+          </div>
 
-        Condition:
-        <select name="condition" required>
-            <option value="">-- Select Condition (1–5) --</option>
-            {% for i in range(1, 6) %}
-                <option value="{{ i }}">{{ i }}</option>
-            {% endfor %}
-        </select><br>
+          <button type="submit" class="submit">Predict</button>
+        </form>
+      </div>
 
-        Odometer (Miles): <input type="number" name="odometer" required><br>
+      <!-- RIGHT: RESULT PANEL -->
+      <aside class="card panel">
+        <div class="head">Estimated Selling Price</div>
 
-        Sale Year:
-        <select name="sale_year" id="sale_year" required>
-            <option value="">-- Select Sale Year --</option>
-        </select><br>
+        {% if prediction %}
+          <div class="result-box">
+            <div class="amount">${{ prediction }}</div>
+          </div>
+        {% else %}
+          <div class="empty">Estimated Selling Price</div>
+        {% endif %}
 
-        <input type="submit" value="Predict">
-    </form>
+        {% if car_description %}
+          <div style="margin-top:14px" class="card" >
+            <div style="padding:14px">
+              <div class="head" style="margin-bottom:6px">Car Description</div>
+              <div style="color:#cbd5e1; font-size:14px; line-height:1.6; text-align: justify;">{{ car_description }}</div>
+            </div>
+          </div>
+        {% endif %}
 
-    {% if prediction %}
-        <div style="margin-top: 20px; padding: 10px; background-color: #f0f0f0; border-radius: 8px; width: fit-content;">
-            <h3>Estimated Selling Price:</h3>
-            <p style="font-size: 20px; font-weight: bold;">${{ prediction }}</p>
-        </div>
-    {% endif %}
-
-    <!-- {% if car_description %}
-    <div style="margin-top: 10px; padding: 10px; background-color: #f0f0f0; border-radius: 8px; width: fit-content;">
-        <h3>Deskripsi Mobil:</h3>
-        <p>{{ car_description }}</p>
+      </aside>
     </div>
-    {% endif %} -->
+  </div>
 
+  <script>
+    // --- Populate dependent selects ---
+    const $ = (id)=>document.getElementById(id);
 
-    <script>
-        document.getElementById("make").addEventListener("change", function() {
-            let make = this.value;
+    $("make").addEventListener("change", async function () {
+      const make = this.value;
 
-            fetch("/get-models/" + encodeURIComponent(make))
-                .then(res => res.json())
-                .then(data => {
-                    let modelSelect = document.getElementById("model");
-                    modelSelect.innerHTML = '<option value="">-- Select Model --</option>';
-                    data.forEach(model => modelSelect.innerHTML += `<option value="${model}">${model}</option>`);
+      // models
+      const models = await fetch("/get-models/" + encodeURIComponent(make)).then(r=>r.json());
+      fillSelect("model", ["-- Select Model --", ...models]);
 
-                    document.getElementById("trim").innerHTML = '<option value="">-- Select Trim --</option>';
-                    document.getElementById("interior").innerHTML = '<option value="">-- Select Interior --</option>';
-                    document.getElementById("year").innerHTML = '<option value="">-- Select Year --</option>';
-                });
-        });
+      // reset others
+      fillSelect("trim", ["-- Select Trim --"]);
+      fillSelect("interior", ["-- Select Interior --"]);
+      fillSelect("year", ["-- Select Year --"]);
+      fillSelect("sale_year", ["-- Select Sale Year --"]);
+    });
 
-        document.getElementById("model").addEventListener("change", function() {
-            let make = document.getElementById("make").value;
-            let model = this.value;
+    $("model").addEventListener("change", async function () {
+      const make = $("make").value;
+      const model = this.value;
 
-            fetch(`/get-trims/${encodeURIComponent(make)}/${encodeURIComponent(model)}`)
-                .then(res => res.json())
-                .then(data => {
-                    let trimSelect = document.getElementById("trim");
-                    trimSelect.innerHTML = '<option value="">-- Select Trim --</option>';
-                    data.forEach(trim => trimSelect.innerHTML += `<option value="${trim}">${trim}</option>`);
-                    document.getElementById("interior").innerHTML = '<option value="">-- Select Interior --</option>';
-                });
+      const [trims, years, saleYears] = await Promise.all([
+        fetch(`/get-trims/${encodeURIComponent(make)}/${encodeURIComponent(model)}`).then(r=>r.json()),
+        fetch(`/get-years/${encodeURIComponent(make)}/${encodeURIComponent(model)}`).then(r=>r.json()),
+        fetch(`/get-sale-years/${encodeURIComponent(make)}/${encodeURIComponent(model)}`).then(r=>r.json()),
+      ]);
 
-            fetch(`/get-years/${encodeURIComponent(make)}/${encodeURIComponent(model)}`)
-                .then(res => res.json())
-                .then(data => {
-                    let yearSelect = document.getElementById("year");
-                    yearSelect.innerHTML = '<option value="">-- Select Year --</option>';
-                    data.forEach(year => yearSelect.innerHTML += `<option value="${year}">${year}</option>`);
-                });
+      fillSelect("trim", ["-- Select Trim --", ...trims]);
+      fillSelect("year", ["-- Select Year --", ...years]);
+      fillSelect("sale_year", ["-- Select Sale Year --", ...saleYears]);
 
-            fetch(`/get-sale-years/${encodeURIComponent(make)}/${encodeURIComponent(model)}`)
-                .then(res => res.json())
-                .then(data => {
-                    let saleYearSelect = document.getElementById("sale_year");
-                    saleYearSelect.innerHTML = '<option value="">-- Select Sale Year --</option>';
-                    data.forEach(year => saleYearSelect.innerHTML += `<option value="${year}">${year}</option>`);
-                });
-        });
+      // reset interior
+      fillSelect("interior", ["-- Select Interior --"]);
+    });
 
-        document.getElementById("trim").addEventListener("change", function() {
-            let make = document.getElementById("make").value;
-            let model = document.getElementById("model").value;
-            let trim = this.value;
+    $("trim").addEventListener("change", async function () {
+      const make = $("make").value;
+      const model = $("model").value;
+      const trim  = this.value;
 
-            fetch(`/get-interiors/${encodeURIComponent(make)}/${encodeURIComponent(model)}/${encodeURIComponent(trim)}`)
-                .then(res => res.json())
-                .then(data => {
-                    let interiorSelect = document.getElementById("interior");
-                    interiorSelect.innerHTML = '<option value="">-- Select Interior --</option>';
-                    data.forEach(int => interiorSelect.innerHTML += `<option value="${int}">${int}</option>`);
-                });
-        });
-    </script>
+      const interiors = await fetch(`/get-interiors/${encodeURIComponent(make)}/${encodeURIComponent(model)}/${encodeURIComponent(trim)}`).then(r=>r.json());
+      fillSelect("interior", ["-- Select Interior --", ...interiors]);
+    });
+
+    function fillSelect(id, items){
+      const sel = $(id);
+      sel.innerHTML = "";
+      items.forEach((it,idx)=>{
+        const opt = document.createElement("option");
+        if(idx===0){ opt.value=""; opt.textContent=it; }
+        else { opt.value=it; opt.textContent=it; }
+        sel.appendChild(opt);
+      });
+    }
+  </script>
 </body>
 </html>
