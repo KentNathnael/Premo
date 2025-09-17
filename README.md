@@ -64,6 +64,15 @@ Use the scripts inside the `test/` directory to evaluate the model.
 
 ---
 
+🌍 Deployment
+
+Premo is deployed and can be accessed at:
+👉 premo.fun
+
+Check it out to see the live web app in action!
+
+---
+
 ## 📌 Planned API Endpoints
 
 If integrated with Flask/FastAPI, planned endpoints include:
