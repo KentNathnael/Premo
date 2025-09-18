@@ -23,8 +23,8 @@ Developed by **Rio Dwi Oktavianto, Kent Nathanael, Theodorus Yuriputra Wibisono,
 ```
 /
 ├── data/                # raw dataset & processed dataset
+├── Deploy/              # deployment
 ├── model/               # trained XGBoost models (pickle/joblib)
-├── test/                # testing scripts & evaluation data
 ├── training.ipynb       # notebook for training & experiments
 ├── requirements.txt     # Python dependencies
 └── README.md
