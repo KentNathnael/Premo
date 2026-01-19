@@ -4,3 +4,5 @@ pandas
 numpy
 jupyter
 flask
+gunicorn
+joblib

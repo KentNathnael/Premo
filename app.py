@@ -11,7 +11,7 @@ load_dotenv()
 api_key = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=api_key)
 
-app = Flask(__name__, template_folder='.')
+app = Flask(__name__)
 
 # Load model dan encoder (cukup sekali)
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -184,4 +184,4 @@ def get_sale_years(make, model):
     return jsonify(years)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
